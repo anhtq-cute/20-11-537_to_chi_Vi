@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10172f">
+  <meta name="description" content="A little universe of gratitude — a 20 November gift from FT 537.">
+  <title>A Little Universe of Gratitude — FT 537</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="ambient-glow glow-one" aria-hidden="true"></div>
+  <div class="ambient-glow glow-two" aria-hidden="true"></div>
+  <div class="cosmic-nebula nebula-one" aria-hidden="true"></div>
+  <div class="cosmic-nebula nebula-two" aria-hidden="true"></div>
+  <div class="aurora-haze" aria-hidden="true"></div>
+  <div class="cosmic-vignette" aria-hidden="true"></div>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar" id="topbar">
+    <a class="brand" href="#scene-1" aria-label="Về đầu trang">
+      <span class="brand-mark">✦</span>
+      <span data-copy="brand">A LITTLE UNIVERSE</span>
+    </a>
+    <div class="topbar-right">
+      <div class="progress-wrap" aria-label="Tiến trình">
+        <span class="progress-label" id="progressLabel">01 <i>/</i> 06</span>
+        <div class="progress-track"><span id="progressFill"></span></div>
+      </div>
+      <button class="icon-button music-toggle" id="musicToggle" type="button" aria-label="Bật nhạc nền" title="Bật / tắt nhạc">
+        <svg class="music-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 18c0 1.1-1.6 2-3.5 2S2 19.1 2 18s1.6-2 3.5-2S9 16.9 9 18Zm12-2c0 1.1-1.6 2-3.5 2S14 17.1 14 16s1.6-2 3.5-2 3.5.9 3.5 2Z"/></svg>
+        <span class="music-state" data-copy="ui.musicOff">MUSIC OFF</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="story" aria-live="off">
+    <!-- SCENE 1 -->
+    <section class="scene scene-intro is-active" id="scene-1" data-scene="0" aria-label="The Invitation">
+      <div class="intro-orbit orbit-a"></div><div class="intro-orbit orbit-b"></div>
+      <div class="intro-center">
+        <div class="eyebrow reveal-item" data-copy="intro.eyebrow">A LITTLE SOMETHING FOR YOU</div>
+        <div class="intro-star reveal-item">✦</div>
+        <h1 class="intro-title reveal-item"><span data-copy="intro.titleLead">Some people make</span><br><em data-copy="intro.titleHighlight">ordinary days</em><br><span data-copy="intro.titleTail">unforgettable...</span></h1>
+        <p class="intro-subtitle reveal-item" data-copy="intro.subtitle">Và tụi em đã chuẩn bị một điều nhỏ dành riêng cho chị.</p>
+        <button class="primary-button reveal-item" id="openGift" type="button">
+          <span data-copy="intro.buttonLabel">Open your little surprise</span><b>✧</b>
+        </button>
+      </div>
+      <div class="intro-footer"><span data-copy="intro.footerDate">20 NOVEMBER · 2026</span><span data-copy="intro.footerCredit">MADE WITH LOVE BY FT 537</span></div>
+      <div class="scroll-hint"><span class="scroll-line"></span><span data-copy="intro.scrollHint">A LITTLE JOURNEY AWAITS</span></div>
+    </section>
+
+    <!-- SCENE 2 -->
+    <section class="scene scene-celebrate" id="scene-2" data-scene="1" aria-label="A Day Worth Celebrating" hidden>
+      <div class="scene-kicker" data-copy="celebration.kicker">A SPECIAL DAY FOR SOMEONE SPECIAL</div>
+      <div class="celebrate-content">
+        <div class="firework firework-left" aria-hidden="true"></div><div class="firework firework-right" aria-hidden="true"></div>
+        <p class="celebrate-overline" data-copy="celebration.overline">TO OUR WONDERFUL TEACHER</p>
+        <h2 class="celebrate-title"><span data-copy="celebration.titleHappy">HAPPY</span><span class="gold-line" data-copy="celebration.titleVietnamese">VIETNAMESE</span><span data-copy="celebration.titleDay">TEACHERS' DAY</span></h2>
+        <div class="date-ornament"><span></span><b data-copy="celebration.date">20 · 11 · 2026</b><span></span></div>
+        <p class="celebrate-message" data-copy="celebration.message">Chúc chị luôn giữ được sự nhiệt huyết, nụ cười và thật nhiều niềm vui trên hành trình của mình.</p>
+        <p class="small-english" data-copy="celebration.smallEnglish">Today is all about you. Thank you for making our classroom brighter!</p>
+      </div>
+      <div class="bottom-note" data-copy="celebration.bottomNote">A LITTLE CELEBRATION FROM FT 537</div>
+    </section>
+
+    <!-- SCENE 3 -->
+    <section class="scene scene-memories" id="scene-3" data-scene="2" aria-label="Our Little Universe" hidden>
+      <div class="memories-heading">
+        <div class="scene-kicker" data-copy="memories.kicker">A THOUSAND LITTLE MOMENTS</div>
+        <h2 class="section-title"><span data-copy="memories.titleLead">Our Little</span> <em data-copy="memories.titleHighlight">Universe</em></h2>
+        <p data-copy="memories.description">Những khoảnh khắc đáng nhớ và khó đỡ:)).</p>
+      </div>
+      <div class="memory-stage" id="memoryStage">
+        <div class="memory-vignette"></div>
+        <div class="polaroid-cloud" id="polaroidCloud"></div>
+        <div class="film-ribbon ribbon-one" id="filmRibbonOne" aria-label="Dải ảnh kỷ niệm thứ nhất"></div>
+        <div class="film-ribbon ribbon-two" id="filmRibbonTwo" aria-label="Dải ảnh kỷ niệm thứ hai"></div>
+        <div class="video-pins" id="videoPins"></div>
+      </div>
+      <div class="memories-foot"><span><i class="mini-spark">✦</i> <span data-copy="memories.clickHint">Click vào ảnh để xem rõ hơn</span></span><span data-copy="memories.tagline">THE MESSIER, THE MORE MEMORABLE</span></div>
+    </section>
+
+    <!-- SCENE 4 -->
+    <section class="scene scene-letter" id="scene-4" data-scene="3" aria-label="A Letter for You" hidden>
+      <div class="letter-stars" aria-hidden="true">✧　 ·　 ✦　 ·　 ✧</div>
+      <div class="letter-intro" id="letterIntro">
+        <div class="scene-kicker" data-copy="letter.kicker">A FEW WORDS FROM OUR HEARTS</div>
+        <h2 class="section-title"><span data-copy="letter.titleLead">A Letter</span> <em data-copy="letter.titleHighlight">for You</em></h2>
+        <p data-copy="letter.subtitle">There are things we don't say enough...</p>
+        <button class="envelope-button" id="openLetter" type="button" aria-label="Mở phong thư">
+          <span class="envelope-glow"></span>
+          <span class="envelope">
+            <span class="envelope-back"></span><span class="envelope-paper"></span><span class="envelope-front"></span>
+            <span class="wax-seal">✦</span>
+          </span>
+          <span class="envelope-label" data-copy="letter.envelopeLabel">OPEN ME</span>
+        </button>
+        <span class="hint-text" data-copy="letter.hint">Click to open the letter</span>
+      </div>
+      <article class="letter-paper" id="letterPaper" aria-label="Lời chúc gửi chị" hidden>
+        <div class="paper-corner">✧</div>
+        <div class="paper-date" data-copy="letter.paperDate">20.11.2026 · FT 537</div>
+        <h3 data-copy="letter.greeting">Dear chị,</h3>
+        <div class="letter-copy">
+          <p>Có lẽ chúng em không phải lúc nào cũng thể hiện được điều đó, nhưng thật sự rất trân trọng những gì chị đã dành cho lớp.</p>
+        </div>
+        <div class="letter-signoff"><span data-copy="letter.signoff">With love,</span><strong data-copy="letter.signature">Your little class ♡</strong></div>
+      </article>
+    </section>
+
+    <!-- SCENE 5 -->
+    <section class="scene scene-surprises" id="scene-5" data-scene="4" aria-label="Hidden Little Surprises" hidden>
+      <div class="surprise-heading">
+        <div class="scene-kicker" data-copy="surpriseSection.kicker">A FEW THINGS ARE WAITING FOR YOU</div>
+        <h2 class="section-title"><span data-copy="surpriseSection.titleLead">Hidden Little</span> <em data-copy="surpriseSection.titleHighlight">Surprises</em></h2>
+        <p data-copy="surpriseSection.description">Chạm vào những vì sao để khám phá nhé chị.</p>
+      </div>
+      <div class="constellation-area" id="constellationArea">
+        <svg class="constellation-lines" viewBox="0 0 900 420" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M145 130 L370 70 L610 155 L755 300 L505 345 L270 280 Z" class="constellation-path"/>
+          <path d="M145 130 L505 345 M370 70 L755 300" class="constellation-path faint"/>
+        </svg>
+        <button class="star-node node-memory" data-surprise="memory" type="button"><span class="node-star">✦</span><span class="node-label" data-surprise-label="memory">MEMORY STAR</span></button>
+        <button class="star-node node-message" data-surprise="message" type="button"><span class="node-star">✧</span><span class="node-label" data-surprise-label="message">MESSAGE STAR</span></button>
+        <button class="star-node node-funny" data-surprise="funny" type="button"><span class="node-star">✦</span><span class="node-label" data-surprise-label="funny">FUNNY STAR</span></button>
+        <button class="star-node node-mystery" data-surprise="mystery" type="button"><span class="node-star">✧</span><span class="node-label" data-surprise-label="mystery">MYSTERY STAR</span></button>
+      </div>
+      <div class="surprise-footer"><span id="starCount">0 / 4 STARS DISCOVERED</span><button class="final-unlock" id="finalUnlock" type="button" disabled><span data-copy="surpriseSection.finalButton">Discover the final surprise</span> <b>→</b></button></div>
+    </section>
+
+    <!-- SCENE 6 -->
+    <section class="scene scene-finale" id="scene-6" data-scene="5" aria-label="Until We Meet Again" hidden>
+      <div class="finale-halo"></div>
+      <div class="finale-content">
+        <div class="scene-kicker" data-copy="finale.kicker">A LITTLE UNIVERSE OF GRATITUDE</div>
+        <div class="finale-constellation">✦　·　✧　·　✦</div>
+        <h2 class="finale-title"><span data-copy="finale.titleLead">Thank you for</span><br><em data-copy="finale.titleHighlight">being part of our story.</em></h2>
+        <p class="finale-vietnamese" data-copy="finale.message">Cảm ơn chị vì đã là một phần kí ức đáng nhớ chúng em.</p>
+        <div class="class-seal"><span data-copy="finale.sealLabel">WITH LOVE</span><strong data-copy="className">FT 537</strong><span data-copy="finale.date">20 · 11 · 2026</span></div>
+        <button class="replay-button" id="replayButton" type="button" data-copy="finale.replayButton">↺  Replay our little universe</button>
+      </div>
+      <div class="finale-sparkles" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Điều hướng các phần">
+    <button class="nav-button previous-button" id="previousButton" type="button" disabled><span>←</span> <span class="nav-word" data-copy="ui.previous">PREVIOUS</span></button>
+    <div class="nav-dots" id="navDots">
+      <button class="nav-dot active" data-go="0" aria-label="Đến phần 1"></button>
+      <button class="nav-dot" data-go="1" aria-label="Đến phần 2"></button>
+      <button class="nav-dot" data-go="2" aria-label="Đến phần 3"></button>
+      <button class="nav-dot" data-go="3" aria-label="Đến phần 4"></button>
+      <button class="nav-dot" data-go="4" aria-label="Đến phần 5"></button>
+      <button class="nav-dot" data-go="5" aria-label="Đến phần 6"></button>
+    </div>
+    <button class="nav-button next-button" id="nextButton" type="button"><span class="nav-word" data-copy="ui.next">NEXT</span> <span>→</span></button>
+  </nav>
+
+  <div class="modal" id="mediaModal" role="dialog" aria-modal="true" aria-label="Xem kỷ niệm" hidden>
+    <button class="modal-close" type="button" data-close-modal aria-label="Đóng">×</button>
+    <div class="modal-content" id="mediaModalContent"></div>
+  </div>
+  <div class="modal surprise-modal" id="surpriseModal" role="dialog" aria-modal="true" aria-label="Bí mật" hidden>
+    <button class="modal-close" type="button" data-close-modal aria-label="Đóng">×</button>
+    <div class="surprise-modal-content" id="surpriseModalContent"></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <audio id="backgroundMusic" loop preload="none">
+    <source data-audio-source src="assets/music/background.mp3" type="audio/mpeg">
+  </audio>
+  <script src="js/content.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
