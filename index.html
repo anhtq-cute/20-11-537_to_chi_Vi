@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/effects.css">
 </head>
 <body>
   <div class="ambient-glow glow-one" aria-hidden="true"></div>
@@ -17,8 +18,11 @@
   <div class="cosmic-nebula nebula-one" aria-hidden="true"></div>
   <div class="cosmic-nebula nebula-two" aria-hidden="true"></div>
   <div class="aurora-haze" aria-hidden="true"></div>
+  <div class="cosmic-galaxy" aria-hidden="true"></div>
+  <div class="bokeh" id="bokeh" aria-hidden="true"></div>
   <div class="cosmic-vignette" aria-hidden="true"></div>
   <canvas id="starfield" aria-hidden="true"></canvas>
+  <canvas id="fxBack" aria-hidden="true"></canvas>
   <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
 
@@ -42,7 +46,7 @@
   <main id="story" aria-live="off">
     <!-- SCENE 1 -->
     <section class="scene scene-intro is-active" id="scene-1" data-scene="0" aria-label="The Invitation">
-      <div class="intro-orbit orbit-a"></div><div class="intro-orbit orbit-b"></div>
+      <div class="intro-orbit orbit-a"></div><div class="intro-orbit orbit-b"></div><div class="intro-orbit orbit-c"></div>
       <div class="intro-center">
         <div class="eyebrow reveal-item" data-copy="intro.eyebrow">A LITTLE SOMETHING FOR YOU</div>
         <div class="intro-star reveal-item">✦</div>
@@ -60,6 +64,7 @@
     <section class="scene scene-celebrate" id="scene-2" data-scene="1" aria-label="A Day Worth Celebrating" hidden>
       <div class="scene-kicker" data-copy="celebration.kicker">A SPECIAL DAY FOR SOMEONE SPECIAL</div>
       <div class="celebrate-content">
+        <div class="god-rays" aria-hidden="true"></div>
         <div class="firework firework-left" aria-hidden="true"></div><div class="firework firework-right" aria-hidden="true"></div>
         <p class="celebrate-overline" data-copy="celebration.overline">TO OUR WONDERFUL TEACHER</p>
         <h2 class="celebrate-title"><span data-copy="celebration.titleHappy">HAPPY</span><span class="gold-line" data-copy="celebration.titleVietnamese">VIETNAMESE</span><span data-copy="celebration.titleDay">TEACHERS' DAY</span></h2>
@@ -126,6 +131,8 @@
         <svg class="constellation-lines" viewBox="0 0 900 420" preserveAspectRatio="none" aria-hidden="true">
           <path d="M145 130 L370 70 L610 155 L755 300 L505 345 L270 280 Z" class="constellation-path"/>
           <path d="M145 130 L505 345 M370 70 L755 300" class="constellation-path faint"/>
+          <path d="M145 130 L370 70 L610 155 L755 300 L505 345 L270 280 Z" class="constellation-pulse" pathLength="1000"/>
+          <path d="M145 130 L505 345 M370 70 L755 300" class="constellation-pulse pulse-b" pathLength="1000"/>
         </svg>
         <button class="star-node node-memory" data-surprise="memory" type="button"><span class="node-star">✦</span><span class="node-label" data-surprise-label="memory">MEMORY STAR</span></button>
         <button class="star-node node-message" data-surprise="message" type="button"><span class="node-star">✧</span><span class="node-label" data-surprise-label="message">MESSAGE STAR</span></button>
@@ -137,6 +144,8 @@
 
     <!-- SCENE 6 -->
     <section class="scene scene-finale" id="scene-6" data-scene="5" aria-label="Until We Meet Again" hidden>
+      <div class="finale-rays" aria-hidden="true"></div>
+      <div class="finale-ring ring-1" aria-hidden="true"></div><div class="finale-ring ring-2" aria-hidden="true"></div><div class="finale-ring ring-3" aria-hidden="true"></div>
       <div class="finale-halo"></div>
       <div class="finale-content">
         <div class="scene-kicker" data-copy="finale.kicker">A LITTLE UNIVERSE OF GRATITUDE</div>
@@ -176,7 +185,9 @@
   <audio id="backgroundMusic" loop preload="none">
     <source data-audio-source src="assets/music/background.mp3" type="audio/mpeg">
   </audio>
+  <canvas id="fxFront" aria-hidden="true"></canvas>
   <script src="js/content.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/effects.js"></script>
 </body>
 </html>

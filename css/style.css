@@ -322,3 +322,4 @@ body.has-pointer .cursor-glow { opacity: 1; }
   .cosmic-nebula, .aurora-haze::before, .aurora-haze::after { animation: none !important; }
   .cursor-glow { display: none !important; }
 }
+

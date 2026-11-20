@@ -175,12 +175,17 @@
   const letterIntro = document.getElementById('letterIntro');
   const letterPaper = document.getElementById('letterPaper');
   openLetter.addEventListener('click', () => {
-    letterIntro.style.opacity = '0';
-    letterIntro.style.transform = 'translateY(-18px) scale(.96)';
+    if (openLetter.classList.contains('is-opening')) return;
+    // Phong thư mở ra (xem css/effects.css) rồi mới chuyển sang tờ thư.
+    openLetter.classList.add('is-opening');
     setTimeout(() => {
-      letterIntro.hidden = true;
-      letterPaper.hidden = false;
-    }, reduceMotion ? 20 : 450);
+      letterIntro.style.opacity = '0';
+      letterIntro.style.transform = 'translateY(-18px) scale(.96)';
+      setTimeout(() => {
+        letterIntro.hidden = true;
+        letterPaper.hidden = false;
+      }, reduceMotion ? 20 : 450);
+    }, reduceMotion ? 0 : 1050);
   });
 
   // Photo collage: 14 floating Polaroids + 16 frames spread across two irregular film ribbons.
@@ -567,3 +572,4 @@
     window.addEventListener('pointerleave', () => document.body.classList.remove('has-pointer'));
   }
 })();
+

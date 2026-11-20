@@ -1,0 +1,439 @@
+/* =========================================================
+   EFFECTS — lớp hiệu ứng bổ sung cho "A Little Universe"
+   ---------------------------------------------------------
+   • Chạy cùng js/effects.js (pháo hoa, confetti, cánh hoa, tia sáng…).
+   • Chỉ thêm hiệu ứng, không đổi bố cục / nội dung của style.css.
+   • Muốn tắt toàn bộ hiệu ứng mới: xóa 2 dòng <link href="css/effects.css">
+     và <script src="js/effects.js"> trong index.html.
+   • Người dùng bật "giảm chuyển động" (prefers-reduced-motion) sẽ được
+     giữ ở mức tối thiểu (xem cuối file).
+   ========================================================= */
+
+@property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+:root {
+  --mx: 0;            /* vị trí con trỏ (-1 → 1), do effects.js cập nhật */
+  --my: 0;
+  --rose: #f4b6c8;
+  --gold-hi: #fff4cf;
+}
+
+/* ---------- Dùng chung ---------- */
+@keyframes spinSlow { to { rotate: 360deg; } }
+@keyframes fxFadeUp { from { opacity: 0; transform: translateY(22px); filter: blur(6px); } }
+@keyframes fxPop { from { opacity: 0; transform: scale(.35); filter: blur(6px); } 60% { transform: scale(1.1); } }
+@keyframes kickerIn { from { opacity: 0; letter-spacing: .62em; filter: blur(4px); } }
+@keyframes lineGrow { from { width: 0; opacity: 0; } }
+@keyframes sweepX { 0%, 35% { transform: translateX(-120%); } 70%, 100% { transform: translateX(120%); } }
+@keyframes nudgeX { 50% { transform: translateX(5px); } }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0deg); } 50% { opacity: var(--o, .9); transform: scale(1) rotate(45deg); } }
+
+/* ---------- Hai lớp canvas (pháo hoa / hạt sáng) ---------- */
+#fxBack, #fxFront { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#fxBack { z-index: 1; }      /* sau chữ, trước sao nền */
+#fxFront { z-index: 65; }    /* trên cả popup */
+
+/* ---------- Nền vũ trụ: parallax theo con trỏ, thiên hà, bokeh ---------- */
+#starfield { translate: calc(var(--mx) * -9px) calc(var(--my) * -7px); scale: 1.03; }
+.cosmic-nebula { translate: calc(var(--mx) * 28px) calc(var(--my) * 20px); }
+.aurora-haze { translate: calc(var(--mx) * 18px) calc(var(--my) * 12px); }
+
+.cosmic-galaxy {
+  display: none;
+  position: fixed; z-index: 0; pointer-events: none;
+  right: -20vmax; top: -24vmax; width: 66vmax; aspect-ratio: 1; border-radius: 50%;
+  opacity: .17; filter: blur(12px);
+  background:
+    radial-gradient(circle, rgba(255,236,190,.6) 0 2%, rgba(214,182,255,.3) 8%, transparent 30%),
+    repeating-conic-gradient(from 0deg, rgba(160,140,255,0) 0deg, rgba(160,140,255,.34) 22deg, rgba(110,170,230,.18) 40deg, rgba(160,140,255,0) 62deg);
+  -webkit-mask: radial-gradient(circle, #000 0 16%, rgba(0,0,0,.55) 40%, transparent 68%);
+          mask: radial-gradient(circle, #000 0 16%, rgba(0,0,0,.55) 40%, transparent 68%);
+  animation: spinSlow 240s linear infinite;
+}
+
+.bokeh { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; translate: calc(var(--mx) * -16px) calc(var(--my) * -12px); }
+.bokeh-orb {
+  position: absolute; left: var(--x); bottom: -16vh; width: var(--s); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--c), .07) 0 52%, rgba(var(--c), .42) 66%, rgba(var(--c), .1) 71%, transparent 74%);
+  filter: blur(var(--b)); opacity: 0; will-change: transform, opacity;
+  animation: bokehRise var(--d) linear var(--dl) infinite;
+}
+@keyframes bokehRise {
+  0% { transform: translate3d(0, 0, 0) scale(.7); opacity: 0; }
+  12% { opacity: var(--o); }
+  82% { opacity: var(--o); }
+  100% { transform: translate3d(var(--dx), -128vh, 0) scale(1.2); opacity: 0; }
+}
+
+/* thanh điều hướng dưới không được chắn các nút bên dưới nó (vd. nút "Discover the final surprise") */
+.bottom-nav { pointer-events: none; }
+.bottom-nav > * { pointer-events: auto; }
+
+/* ---------- Chữ: hiện từng ký tự + sóng ánh vàng ---------- */
+.fx-word { display: inline-block; white-space: nowrap; }
+.fx-char { display: inline-block; }
+.scene.is-active .fx-char {
+  animation: charIn 1.05s cubic-bezier(.2, .8, .2, 1) calc(var(--base, .3s) + var(--i, 0) * 42ms) backwards;
+}
+@keyframes charIn {
+  from { opacity: 0; transform: perspective(500px) translateY(.55em) rotateX(-75deg) scale(.9); filter: blur(10px); }
+}
+.scene.is-active :is(.intro-title em, .section-title em, .finale-title em, .gold-line) .fx-char {
+  animation:
+    charIn 1.05s cubic-bezier(.2, .8, .2, 1) calc(var(--base, .3s) + var(--i, 0) * 42ms) backwards,
+    goldWave 5.5s ease-in-out calc(var(--base, .3s) + 1.8s + var(--i, 0) * 120ms) infinite;
+}
+@keyframes goldWave {
+  0%, 24%, 100% { color: var(--gold); text-shadow: 0 0 0 rgba(255,232,160,0); }
+  10% { color: #fffbe9; text-shadow: 0 0 14px rgba(255,232,160,.95), 0 0 34px rgba(242,217,155,.55); }
+}
+.scene-intro { --base: .75s; }
+.scene-celebrate { --base: .5s; }
+.scene-finale { --base: .9s; }
+.scene.is-active .finale-constellation .fx-char { animation: charIn 1s ease calc(.4s + var(--i, 0) * 90ms) backwards, starTwinkle 3.2s ease-in-out calc(1.6s + var(--i, 0) * .3s) infinite; }
+@keyframes starTwinkle { 50% { opacity: .4; transform: scale(1.45) rotate(25deg); } }
+
+/* Hạt lấp lánh DOM ở mỗi cảnh (effects.js tạo) */
+.fx-twinkles { position: absolute; inset: 0; pointer-events: none; z-index: -1; overflow: hidden; }
+.fx-twinkles i {
+  position: absolute; left: var(--x); top: var(--y); font-style: normal; font-size: var(--s); line-height: 1;
+  color: var(--tc, #f2d99b); opacity: 0; text-shadow: 0 0 10px currentColor, 0 0 22px currentColor;
+  animation: twinkle var(--d) ease-in-out var(--dl) infinite;
+}
+
+/* =========================================================
+   CẢNH 1 — MỜI MỞ QUÀ
+   ========================================================= */
+.scene-intro:not(.is-active) .reveal-item { animation: none; }   /* để chạy lại khi Replay */
+
+/* quỹ đạo có sao chổi chạy quanh */
+.intro-orbit { --spin: 26s; --hc: 255, 236, 170; }
+.orbit-b { --spin: 19s; --hc: 214, 190, 255; }
+.orbit-c { width: min(80vw, 940px); transform: scaleY(.3) rotate(9deg); border-color: rgba(140,190,235,.07); --spin: 36s; --hc: 150, 205, 255; }
+.intro-orbit::before, .intro-orbit::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; animation: spinSlow var(--spin) linear infinite; }
+.intro-orbit::before {
+  background: conic-gradient(from 0deg, transparent 0 60%, rgba(var(--hc), 0) 62%, rgba(var(--hc), .7) 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+}
+.intro-orbit::after { background: radial-gradient(circle at 50% 0, #fff 0 1.6px, rgba(var(--hc), .95) 3px, rgba(var(--hc), .35) 7px, transparent 13px); }
+.orbit-b::before, .orbit-b::after { animation-direction: reverse; }
+.orbit-b::before { background: conic-gradient(from 0deg, rgba(var(--hc), .7) 0, rgba(var(--hc), 0) 38%, transparent 40% 100%); }
+
+/* ngôi sao giữa: vòng sáng lan tỏa */
+.intro-star { position: relative; }
+.intro-star::before, .intro-star::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px;
+  border-radius: 50%; border: 1px solid rgba(242,217,155,.6); opacity: 0; animation: starRing 3.4s ease-out infinite;
+}
+.intro-star::after { animation-delay: 1.7s; }
+@keyframes starRing { 0% { transform: scale(.5); opacity: .75; } 100% { transform: scale(3.6); opacity: 0; } }
+
+/* nút mở quà: ánh chạy qua + vòng sáng */
+.primary-button {
+  position: relative; isolation: isolate;
+  background:
+    linear-gradient(115deg, transparent 38%, rgba(255,255,255,.8) 50%, transparent 62%) no-repeat 110% 0 / 230% 100%,
+    linear-gradient(115deg, #f7e6b9, #d9c18b);
+  animation: btnShine 3.6s ease-in-out 1.8s infinite;
+}
+@keyframes btnShine { 0%, 35% { background-position: 110% 0, 0 0; } 65%, 100% { background-position: -20% 0, 0 0; } }
+.primary-button::after { content: ''; position: absolute; inset: -7px; border-radius: 99px; border: 1px solid rgba(242,217,155,.6); pointer-events: none; animation: btnRing 2.6s ease-out infinite; }
+@keyframes btnRing { 0% { transform: scale(.94); opacity: .85; } 100% { transform: scale(1.16, 1.55); opacity: 0; } }
+.primary-button b { display: inline-block; animation: spinSlow 6s linear infinite; }
+
+/* =========================================================
+   CẢNH 2 — HAPPY VIETNAMESE TEACHERS' DAY
+   ========================================================= */
+.scene-celebrate.is-active .scene-kicker { animation: kickerIn 1.2s .1s both; }
+.scene-celebrate.is-active .celebrate-overline { animation: kickerIn 1.1s .35s both; }
+.scene-celebrate.is-active .date-ornament b { animation: fxPop .9s 1.3s both; text-shadow: 0 0 14px rgba(242,217,155,.5); }
+.scene-celebrate.is-active .date-ornament span { animation: lineGrow 1.1s 1.5s both; }
+.scene-celebrate.is-active .celebrate-message { animation: fxFadeUp 1s 1.7s both; }
+.scene-celebrate.is-active .small-english { animation: fxFadeUp 1s 2s both; }
+.scene-celebrate.is-active .bottom-note { animation: kickerIn 1.2s 2.2s both; }
+
+/* tia sáng xoay sau tiêu đề (vị trí do effects.js căn theo tiêu đề) */
+.god-rays, .finale-rays {
+  position: absolute; left: var(--cx, 50%); top: var(--cy, 50%); width: min(135vmax, 1700px); aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; pointer-events: none; z-index: -1; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255,228,165,.2) 0 2.2deg, transparent 2.2deg 10deg);
+  -webkit-mask: radial-gradient(circle, #000 0, rgba(0,0,0,.6) 14%, transparent 42%);
+          mask: radial-gradient(circle, #000 0, rgba(0,0,0,.6) 14%, transparent 42%);
+}
+.scene-celebrate.is-active .god-rays { animation: raysIn 2.6s ease .3s forwards; --ray: .28; }
+.scene-finale.is-active .finale-rays { left: 50%; top: 50%; animation: spinSlow 120s linear infinite reverse, raysIn 3s ease 1s forwards; --ray: .22; }
+@keyframes raysIn { to { opacity: var(--ray, .6); } }
+
+/* ánh lấp lánh lướt qua chữ VIETNAMESE */
+.gold-line { position: relative; align-self: center; }
+.scene-celebrate.is-active .gold-line::after {
+  content: '✦'; position: absolute; top: 50%; left: -8%; translate: 0 -50%; font-size: .5em; font-style: normal; color: #fff;
+  text-shadow: 0 0 18px #ffe9a8, 0 0 44px #f2d99b; opacity: 0; pointer-events: none; animation: glint 6.5s ease-in-out 3.2s infinite;
+}
+@keyframes glint {
+  0% { left: -8%; opacity: 0; scale: .2; rotate: 0deg; }
+  6% { opacity: 1; scale: 1.25; }
+  30% { left: 104%; opacity: 1; scale: 1.1; rotate: 200deg; }
+  34%, 100% { left: 108%; opacity: 0; scale: .2; rotate: 220deg; }
+}
+.firework { filter: drop-shadow(0 0 10px rgba(242,217,155,.45)); }
+
+/* =========================================================
+   CẢNH 3 — ẢNH KỶ NIỆM
+   ========================================================= */
+.scene-memories.is-active .scene-kicker { animation: kickerIn 1.2s .1s both; }
+.scene-memories.is-active .memories-heading p { animation: fxFadeUp 1s 1s both; }
+.scene-memories.is-active .memories-foot { animation: fxFadeUp 1s 2.4s both; }
+@keyframes vignetteBreath { from { opacity: .7; transform: scale(.96); } to { opacity: 1; transform: scale(1.06); } }
+
+.photo-card { overflow: hidden; }
+.scene-memories.is-active .photo-card {
+  animation:
+    cardDeal 1s cubic-bezier(.2, .9, .25, 1.12) calc(.35s + var(--i, 0) * 75ms) backwards;
+}
+@keyframes cardDeal { from { opacity: 0; transform: translate(-50%, -200%) rotate(calc(var(--rot, 0deg) - 40deg)) scale(.5); } }
+@keyframes cardBob { 0%, 100% { translate: 0 0; } 50% { translate: 0 var(--ba, -8px); } }
+.photo-card:hover, .photo-card:focus-visible { animation-play-state: paused; }
+.photo-card:hover, .photo-card:focus-visible {
+  transform: translate(-50%, -56%) perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(1.14);
+}
+.photo-card::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s ease; mix-blend-mode: soft-light; background: radial-gradient(circle at var(--gx, 50%) var(--gy, 25%), rgba(255,255,255,.7), transparent 58%); }
+.photo-card:hover::after, .photo-card:focus-visible::after { opacity: 1; }
+.photo-card::before { content: ''; position: absolute; inset: -20% -60%; z-index: 2; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.75) 50%, transparent 58%); }
+.photo-card.glint::before { animation: cardGlint 1.15s ease-in-out forwards; }
+@keyframes cardGlint { 0% { transform: translateX(-55%); opacity: 0; } 12% { opacity: 1; } 100% { transform: translateX(55%); opacity: 0; } }
+
+/* dải film: ánh sáng chạy dọc + trượt vào */
+.ribbon-one { animation: ribbonDriftOne 13s ease-in-out infinite alternate, ribbonInL 1.1s ease .5s backwards; }
+.ribbon-two { animation: ribbonDriftTwo 16s ease-in-out infinite alternate, ribbonInR 1.1s ease .7s backwards; }
+.film-ribbon {
+  background:
+    linear-gradient(105deg, transparent 40%, rgba(242,217,155,.16) 50%, transparent 60%) no-repeat 140% 0 / 260% 100%,
+    rgba(9,13,29,.76);
+}
+@keyframes filmGleam { from { background-position: 140% 0, 0 0; } to { background-position: -40% 0, 0 0; } }
+@keyframes ribbonInL { from { opacity: 0; translate: -90px 0; } }
+@keyframes ribbonInR { from { opacity: 0; translate: 90px 0; } }
+.scene-memories.is-active .film-frame { animation: frameIn .75s cubic-bezier(.2, .9, .3, 1.1) calc(1.3s + var(--i, 0) * 85ms) backwards; }
+@keyframes frameIn { from { opacity: 0; transform: translateY(34px) rotate(7deg) scale(.8); } }
+.film-frame:hover { box-shadow: 0 8px 22px rgba(242,217,155,.3); }
+
+/* nút video: vòng sóng lan + nút play đập nhịp */
+.scene-memories.is-active .video-pin { animation: fxPop .9s cubic-bezier(.2, 1.3, .3, 1) 1.9s backwards; }
+.video-pin::before { content: ''; position: absolute; inset: -1px; border-radius: 99px; border: 1px solid rgba(242,217,155,.75); pointer-events: none; animation: pinRipple 2.8s ease-out infinite; }
+.video-pin:nth-child(2)::before { animation-delay: .9s; }
+.video-pin:nth-child(3)::before { animation-delay: 1.8s; }
+@keyframes pinRipple { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(1.3, 1.9); opacity: 0; } }
+.play-small { animation: playPulse 1.8s ease-in-out infinite; }
+@keyframes playPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(242,217,155,.55); } 50% { box-shadow: 0 0 0 6px rgba(242,217,155,0); } }
+
+/* =========================================================
+   CẢNH 4 — THƯ
+   ========================================================= */
+.scene-letter.is-active .scene-kicker { animation: kickerIn 1.2s .1s both; }
+.scene-letter.is-active .letter-intro > p { animation: fxFadeUp 1s .9s both; }
+.scene-letter.is-active .envelope-button { animation: fxPop 1s cubic-bezier(.2, 1.3, .3, 1) 1.3s backwards, envFloat 4.6s ease-in-out 2.3s infinite; }
+@keyframes envFloat { 50% { translate: 0 -10px; } }
+.letter-stars { animation: lettersTwinkle 5s ease-in-out infinite; }
+@keyframes lettersTwinkle { 50% { opacity: .35; letter-spacing: 1.7em; } }
+.hint-text { animation: hintBlink 2.6s ease-in-out infinite; }
+@keyframes hintBlink { 50% { opacity: .25; } }
+@keyframes glowBreath { 50% { opacity: 1; scale: 1.25; } }
+.wax-seal { animation: sealBeat 2s ease-in-out infinite; }
+@keyframes sealBeat {
+  0%, 56%, 100% { scale: 1; box-shadow: 0 3px 7px rgba(0,0,0,.2), 0 0 0 0 rgba(255,190,190,.0); }
+  14% { scale: 1.17; box-shadow: 0 3px 7px rgba(0,0,0,.2), 0 0 14px 3px rgba(255,190,190,.55); }
+  28% { scale: 1; }
+  42% { scale: 1.1; }
+}
+/* phong thư mở ra (main.js gắn class is-opening khi bấm) */
+.envelope-button.is-opening { animation: none; }
+.envelope-button.is-opening .envelope { animation: envShake .55s ease; }
+@keyframes envShake { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-4deg) translateY(-6px); } 45% { transform: rotate(3.5deg) translateY(-3px); } 70% { transform: rotate(-2deg); } }
+.envelope-button.is-opening .envelope-paper { transform: translateY(-74px); transition: transform .85s cubic-bezier(.2, .9, .3, 1) .35s; }
+.envelope-button.is-opening .wax-seal { animation: sealBreak .6s ease forwards; }
+@keyframes sealBreak { 40% { scale: 1.45; rotate: 12deg; opacity: 1; } 100% { scale: 2.3; rotate: -34deg; opacity: 0; } }
+.envelope-button.is-opening .envelope-glow { animation: glowFlash 1.1s ease forwards; }
+@keyframes glowFlash { 0% { opacity: .6; scale: 1; } 50% { opacity: 1; scale: 2.2; } 100% { opacity: .8; scale: 2.6; } }
+.envelope-button.is-opening .envelope-label { opacity: 0; transition: opacity .4s; }
+
+/* tờ thư: ánh sáng lướt qua, chữ hiện dần, chữ ký viết ra */
+.letter-paper { animation: paperRise .8s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes paperGlow {
+  0%, 100% { box-shadow: 0 25px 80px rgba(0,0,0,.4), 0 0 40px rgba(242,217,155,.1); }
+  50% { box-shadow: 0 25px 80px rgba(0,0,0,.4), 0 0 90px rgba(242,217,155,.3); }
+}
+.letter-paper::after { content: ''; position: absolute; inset: 0; pointer-events: none; transform: translateX(-110%); background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.6) 50%, transparent 65%); animation: paperSheen 1.9s ease .55s forwards; }
+@keyframes paperSheen { to { transform: translateX(110%); } }
+.paper-corner { animation: spinSlow 16s linear infinite; }
+.letter-paper:not([hidden]) :is(.paper-date, h3) { animation: fxFadeUp .9s .35s both; }
+.letter-paper:not([hidden]) h3 { animation-delay: .6s; }
+.letter-paper:not([hidden]) .letter-copy p { animation: inkIn 1.1s ease calc(1s + var(--pi, 0) * .75s) both; }
+@keyframes inkIn { from { opacity: 0; transform: translateY(10px); filter: blur(3px); } }
+.letter-signoff > span { animation: fxFadeUp 1s calc(1.2s + var(--np, 4) * .75s) both; }
+.letter-signoff strong { display: inline-block; align-self: flex-start; animation: inkWipe 1.9s ease calc(1.5s + var(--np, 4) * .75s) both; }
+@keyframes inkWipe { from { clip-path: inset(-15% 100% -15% 0); } to { clip-path: inset(-15% -6% -15% 0); } }
+
+/* =========================================================
+   CẢNH 5 — NGÔI SAO BÍ MẬT
+   ========================================================= */
+.scene-surprises.is-active .scene-kicker { animation: kickerIn 1.2s .1s both; }
+.scene-surprises.is-active .surprise-heading p { animation: fxFadeUp 1s 1s both; }
+.scene-surprises.is-active .constellation-lines { animation: fxFadeUp 1.6s .4s both; }
+.scene-surprises.is-active .surprise-footer { animation: fxFadeUp 1s 2.1s both; }
+
+.node-memory { --k: 0; --fd: 6.2s; }
+.node-message { --k: 1; --fd: 7.1s; }
+.node-funny { --k: 2; --fd: 5.7s; }
+.node-mystery { --k: 3; --fd: 6.6s; }
+.scene-surprises.is-active .star-node {
+  animation:
+    starAppear 1.1s cubic-bezier(.2, 1.4, .3, 1) calc(.6s + var(--k, 0) * .25s) backwards,
+    nodeFloat var(--fd, 6s) ease-in-out calc(var(--k, 0) * -1.4s) infinite;
+}
+@keyframes starAppear { from { opacity: 0; transform: translate(-50%, -50%) scale(0) rotate(-140deg); } }
+@keyframes nodeFloat { 50% { translate: 0 -9px; } }
+
+.node-star { position: relative; }
+.node-star::before { content: ''; position: absolute; inset: -16px; border-radius: 50%; z-index: -1; background: radial-gradient(circle, rgba(242,217,155,.38), transparent 66%); animation: haloPulse 3.2s ease-in-out infinite; }
+.node-star::after {
+  content: ''; position: absolute; inset: -34%; pointer-events: none; opacity: .85; animation: spinSlow 9s linear infinite;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,236,170,.85), transparent) center / 100% 1px no-repeat,
+    linear-gradient(0deg, transparent, rgba(255,236,170,.85), transparent) center / 1px 100% no-repeat;
+}
+@keyframes haloPulse { 50% { transform: scale(1.35); opacity: .6; } }
+.star-node:hover .node-label { color: #fff; letter-spacing: .26em; }
+.node-label { transition: letter-spacing .35s ease, color .3s ease; }
+.star-node.discovered .node-star::before { background: radial-gradient(circle, rgba(255,240,190,.7), transparent 66%); animation-duration: 2s; }
+.star-orbit { position: absolute; inset: -13px; border-radius: 50%; border: 1px dashed rgba(242,217,155,.55); pointer-events: none; animation: spinSlow 12s linear infinite; }
+.star-orbit::after { content: ''; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: #fff6d0; box-shadow: 0 0 10px 2px rgba(255,226,150,.95); }
+
+/* đường chòm sao: chảy dòng + xung ánh sáng, sáng dần khi khám phá */
+.constellation-path { animation: dashFlow 2.4s linear infinite; stroke: rgba(242,217,155, calc(.28 + var(--found, 0) * .5)); }
+@keyframes dashFlow { to { stroke-dashoffset: -28; } }
+.constellation-lines { filter: drop-shadow(0 0 calc(var(--found, 0) * 8px) rgba(242,217,155,.7)); }
+.constellation-pulse { fill: none; stroke: #fff3c4; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 36 964; stroke-dashoffset: 0; opacity: .95; animation: pulseTravel 6.5s linear infinite; }
+.constellation-pulse.pulse-b { stroke: #cbbcff; animation-duration: 9s; animation-direction: reverse; }
+@keyframes pulseTravel { to { stroke-dashoffset: -1000; } }
+
+/* bộ đếm + nút mở khóa */
+#starCount { display: inline-block; }
+#starCount.bump { animation: countBump .75s ease; }
+@keyframes countBump { 40% { transform: scale(1.35); color: #fff3c4; text-shadow: 0 0 14px rgba(242,217,155,.9); } }
+.final-unlock { position: relative; overflow: hidden; isolation: isolate; }
+.final-unlock:not(:disabled) { border-color: rgba(242,217,155,.95); color: #fff3c8; text-shadow: 0 0 12px rgba(242,217,155,.8); animation: unlockPulse 2.2s ease-in-out infinite; }
+.final-unlock:not(:disabled)::before { content: ''; position: absolute; inset: 0; z-index: -1; transform: translateX(-120%); background: linear-gradient(105deg, transparent 38%, rgba(255,240,190,.42) 50%, transparent 62%); animation: sweepX 2.8s ease-in-out infinite; }
+.final-unlock:not(:disabled) b { display: inline-block; animation: nudgeX 1.4s ease-in-out infinite; }
+@keyframes unlockPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242,217,155,.45), 0 0 22px rgba(242,217,155,.22); }
+  50% { box-shadow: 0 0 0 10px rgba(242,217,155,0), 0 0 42px rgba(242,217,155,.42); }
+}
+
+/* =========================================================
+   CẢNH 6 — KẾT
+   ========================================================= */
+.scene-finale.is-active .scene-kicker { animation: kickerIn 1.3s .2s both; }
+.scene-finale.is-active .finale-constellation { animation: fxFadeUp 1.2s .5s both; }
+.scene-finale.is-active .finale-vietnamese { animation: fxFadeUp 1.1s 2.1s both; }
+.scene-finale.is-active .replay-button { animation: fxFadeUp 1.1s 3.2s both; }
+.finale-halo { animation: haloBreath 6s ease-in-out infinite; }
+@keyframes haloBreath { 50% { transform: scale(1.1); opacity: .65; } }
+.finale-ring { position: absolute; left: 50%; top: 50%; width: min(70vw, 780px); aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; border: 1px solid rgba(242,217,155,.38); pointer-events: none; opacity: 0; animation: ringOut 8s ease-out infinite; }
+.ring-2, .ring-3 { display: none; }
+@keyframes ringOut { 0% { transform: scale(.22); opacity: 0; } 12% { opacity: .6; } 100% { transform: scale(1.4); opacity: 0; } }
+
+.class-seal { position: relative; }
+.scene-finale.is-active .class-seal { animation: sealStamp 1.15s cubic-bezier(.2, 1.3, .3, 1) 2.4s backwards; }
+@keyframes sealStamp { from { opacity: 0; transform: rotate(-40deg) scale(2.8); } 55% { opacity: 1; } }
+.class-seal::before {
+  content: ''; position: absolute; inset: -7px; border-radius: 50%; pointer-events: none; animation: spinSlow 6s linear infinite;
+  background: conic-gradient(from 0deg, transparent 0 68%, rgba(255,232,170,.95) 88%, transparent 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+}
+@keyframes sealRing { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.7); opacity: 0; } }
+.finale-sparkles { position: absolute; inset: 0; pointer-events: none; }
+.finale-sparkles i { position: absolute; left: var(--x); top: var(--y); font-style: normal; font-size: var(--s); color: var(--tc, #f2d99b); opacity: 0; text-shadow: 0 0 10px currentColor, 0 0 24px currentColor; animation: twinkle var(--d) ease-in-out var(--dl) infinite; }
+
+/* =========================================================
+   KHUNG ĐIỀU HƯỚNG / NHẠC / POPUP
+   ========================================================= */
+.brand-mark { display: inline-block; animation: spinSlow 14s linear infinite; }
+.progress-track span { background: linear-gradient(90deg, #d9c18b, #fff7d6 50%, #d9c18b) 0 0 / 200% 100%; animation: barShimmer 2.2s linear infinite; }
+@keyframes barShimmer { to { background-position: -200% 0; } }
+.nav-dot.active { animation: dotPulse 2.4s ease-in-out infinite; }
+@keyframes dotPulse { 50% { box-shadow: 0 0 18px rgba(242,217,155,.95); } }
+.next-button:not(:disabled) > span:last-child { display: inline-block; animation: nudgeX 1.6s ease-in-out infinite; }
+
+/* thanh equalizer khi nhạc đang phát */
+.music-toggle .eq { display: none; align-items: flex-end; gap: 2px; height: 12px; }
+.music-toggle.is-playing .eq { display: inline-flex; }
+.music-toggle.is-playing .music-icon { display: none; }
+.eq i { width: 2px; height: 100%; border-radius: 2px; background: currentColor; transform-origin: bottom; animation: eqBar .9s ease-in-out infinite alternate; }
+.eq i:nth-child(2) { animation-duration: .65s; animation-delay: -.3s; }
+.eq i:nth-child(3) { animation-duration: 1.1s; animation-delay: -.5s; }
+.eq i:nth-child(4) { animation-duration: .75s; animation-delay: -.15s; }
+@keyframes eqBar { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
+
+/* popup ảnh / video */
+.modal::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 46%, rgba(242,217,155,.13), transparent 52%), radial-gradient(circle at 18% 82%, rgba(140,120,220,.14), transparent 42%); }
+.modal:not([hidden]) .modal-content img { animation: photoDevelop 1.05s cubic-bezier(.2, .85, .25, 1) both; }
+@keyframes photoDevelop {
+  0% { opacity: 0; transform: scale(.55) rotate(-6deg) translateY(34px); filter: blur(14px) brightness(2.3) sepia(.6); }
+  55% { opacity: 1; filter: blur(2px) brightness(1.3) sepia(.3); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+.modal:not([hidden]) .modal-content video, .modal:not([hidden]) .video-missing { animation: fxPop .7s cubic-bezier(.2, 1.1, .3, 1) both; }
+.modal:not([hidden]) .modal-caption { animation: fxFadeUp .8s .55s both; }
+.modal-close { transition: transform .35s ease, background .25s ease, border-color .25s ease; }
+.modal-close:hover { transform: rotate(90deg) scale(1.08); border-color: var(--gold); background: rgba(242,217,155,.14); }
+
+/* popup ngôi sao bí mật */
+.surprise-modal-content { position: relative; overflow: hidden; isolation: isolate; border-radius: 4px; }
+.surprise-modal:not([hidden]) .surprise-modal-content { animation: cardPop .9s cubic-bezier(.2, 1.25, .3, 1) both; }
+@keyframes cardPop { from { opacity: 0; transform: translateY(44px) scale(.8) rotateX(14deg); filter: blur(8px); } }
+.surprise-modal-content::before {
+  content: ''; position: absolute; left: 50%; top: 78px; width: 540px; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, rgba(255,228,160,.2) 0 3deg, transparent 3deg 12deg);
+  -webkit-mask: radial-gradient(circle, #000 0, transparent 62%); mask: radial-gradient(circle, #000 0, transparent 62%);
+  animation: spinSlow 40s linear infinite;
+}
+.surprise-modal-content::after {
+  content: ''; position: absolute; inset: 0; padding: 1px; z-index: 3; pointer-events: none;
+  background: conic-gradient(from var(--ang), transparent 0 76%, rgba(255,232,170,.95) 90%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude;
+  animation: angSpin 4.5s linear infinite;
+}
+@keyframes angSpin { to { --ang: 360deg; } }
+.surprise-modal:not([hidden]) .surprise-symbol { display: inline-block; animation: symbolIn 1.1s cubic-bezier(.2, 1.3, .3, 1) .15s both, symbolTwinkle 3s ease-in-out 1.3s infinite; }
+@keyframes symbolIn { from { opacity: 0; transform: scale(0) rotate(-200deg); } }
+@keyframes symbolTwinkle { 50% { scale: 1.22; rotate: 20deg; } }
+.surprise-modal:not([hidden]) .surprise-modal-content h3 { animation: fxFadeUp .8s .4s both; }
+.surprise-modal:not([hidden]) .surprise-modal-content p { animation: fxFadeUp .9s .65s both; }
+.surprise-modal:not([hidden]) .gratitude-constellation { animation: fxFadeUp .9s .9s both; }
+
+/* =========================================================
+   ĐIỆN THOẠI / MÀN HÌNH NHỎ
+   ========================================================= */
+@media (max-width: 760px) {
+  .bokeh-orb:nth-child(n + 6) { display: none; }
+  .cosmic-galaxy { opacity: .13; }
+  .surprise-modal-content::before { width: 420px; top: 66px; }
+  .god-rays, .finale-rays { width: 180vmax; }
+}
+@media (pointer: coarse) {
+  .photo-card:hover, .photo-card:focus-visible { transform: translate(-50%, -56%) rotate(0deg) scale(1.1); }
+}
+
+/* =========================================================
+   GIẢM CHUYỂN ĐỘNG — chỉ giữ lại hình ảnh tĩnh
+   (quy tắc chung trong style.css đã rút ngắn mọi animation)
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .bokeh, .cosmic-galaxy, #fxBack, #fxFront { display: none !important; }
+  .god-rays, .finale-rays { opacity: .35; }
+  #starfield, .cosmic-nebula, .aurora-haze, .bokeh { translate: none; }
+}
